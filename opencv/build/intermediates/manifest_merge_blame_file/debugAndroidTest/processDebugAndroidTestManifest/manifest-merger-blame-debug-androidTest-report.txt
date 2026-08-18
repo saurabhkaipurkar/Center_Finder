@@ -1,0 +1,31 @@
+1<?xml version="1.0" encoding="utf-8"?>
+2<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+3    package="org.opencv.test" >
+4
+5    <uses-sdk
+5-->/Users/hemant/Center_Finder/opencv/build/intermediates/tmp/manifest/androidTest/debug/tempFile1ProcessTestManifest5269382248349516712.xml:5:5-74
+6        android:minSdkVersion="21"
+6-->/Users/hemant/Center_Finder/opencv/build/intermediates/tmp/manifest/androidTest/debug/tempFile1ProcessTestManifest5269382248349516712.xml:5:15-41
+7        android:targetSdkVersion="34" />
+7-->/Users/hemant/Center_Finder/opencv/build/intermediates/tmp/manifest/androidTest/debug/tempFile1ProcessTestManifest5269382248349516712.xml:5:42-71
+8
+9    <instrumentation
+9-->/Users/hemant/Center_Finder/opencv/build/intermediates/tmp/manifest/androidTest/debug/tempFile1ProcessTestManifest5269382248349516712.xml:7:5-11:65
+10        android:name="androidx.test.runner.AndroidJUnitRunner"
+10-->/Users/hemant/Center_Finder/opencv/build/intermediates/tmp/manifest/androidTest/debug/tempFile1ProcessTestManifest5269382248349516712.xml:7:22-76
+11        android:functionalTest="false"
+11-->/Users/hemant/Center_Finder/opencv/build/intermediates/tmp/manifest/androidTest/debug/tempFile1ProcessTestManifest5269382248349516712.xml:10:22-52
+12        android:handleProfiling="false"
+12-->/Users/hemant/Center_Finder/opencv/build/intermediates/tmp/manifest/androidTest/debug/tempFile1ProcessTestManifest5269382248349516712.xml:9:22-53
+13        android:label="Tests for org.opencv.test"
+13-->/Users/hemant/Center_Finder/opencv/build/intermediates/tmp/manifest/androidTest/debug/tempFile1ProcessTestManifest5269382248349516712.xml:11:22-63
+14        android:targetPackage="org.opencv.test" />
+14-->/Users/hemant/Center_Finder/opencv/build/intermediates/tmp/manifest/androidTest/debug/tempFile1ProcessTestManifest5269382248349516712.xml:8:22-61
+15
+16    <application
+16-->INJECTED
+17        android:debuggable="true"
+18        android:extractNativeLibs="true" />
+18-->INJECTED
+19
+20</manifest>

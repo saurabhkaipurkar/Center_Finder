@@ -1,0 +1,50 @@
+{
+  "installationFolder": "/Users/hemant/Center_Finder/opencv/build/intermediates/prefab_package/debug/prefab",
+  "gradlePath": ":opencv",
+  "packageInfo": {
+    "packageName": "opencv",
+    "packageSchemaVersion": 2,
+    "packageDependencies": [],
+    "modules": [
+      {
+        "moduleName": "opencv_jni_shared",
+        "moduleHeaders": "/Users/hemant/Center_Finder/opencv/native/jni/include",
+        "moduleExportLibraries": [],
+        "abis": [
+          {
+            "abiName": "armeabi-v7a",
+            "abiApi": 21,
+            "abiNdkMajor": 28,
+            "abiStl": "c++_shared",
+            "abiLibrary": "/Users/hemant/Center_Finder/opencv/.cxx/Debug/2e5g2e5f/armeabi-v7a/libopencv_jni_shared.a",
+            "abiAndroidGradleBuildJsonFile": "/Users/hemant/Center_Finder/opencv/.cxx/Debug/2e5g2e5f/armeabi-v7a/android_gradle_build.json"
+          },
+          {
+            "abiName": "arm64-v8a",
+            "abiApi": 21,
+            "abiNdkMajor": 28,
+            "abiStl": "c++_shared",
+            "abiLibrary": "/Users/hemant/Center_Finder/opencv/.cxx/Debug/2e5g2e5f/arm64-v8a/libopencv_jni_shared.a",
+            "abiAndroidGradleBuildJsonFile": "/Users/hemant/Center_Finder/opencv/.cxx/Debug/2e5g2e5f/arm64-v8a/android_gradle_build.json"
+          },
+          {
+            "abiName": "x86",
+            "abiApi": 21,
+            "abiNdkMajor": 28,
+            "abiStl": "c++_shared",
+            "abiLibrary": "/Users/hemant/Center_Finder/opencv/.cxx/Debug/2e5g2e5f/x86/libopencv_jni_shared.a",
+            "abiAndroidGradleBuildJsonFile": "/Users/hemant/Center_Finder/opencv/.cxx/Debug/2e5g2e5f/x86/android_gradle_build.json"
+          },
+          {
+            "abiName": "x86_64",
+            "abiApi": 21,
+            "abiNdkMajor": 28,
+            "abiStl": "c++_shared",
+            "abiLibrary": "/Users/hemant/Center_Finder/opencv/.cxx/Debug/2e5g2e5f/x86_64/libopencv_jni_shared.a",
+            "abiAndroidGradleBuildJsonFile": "/Users/hemant/Center_Finder/opencv/.cxx/Debug/2e5g2e5f/x86_64/android_gradle_build.json"
+          }
+        ]
+      }
+    ]
+  }
+}

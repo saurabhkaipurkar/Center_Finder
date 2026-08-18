@@ -1,0 +1,9 @@
+org.opencv-pngs-0 /Users/hemant/Center_Finder/opencv/build/generated/res/pngs/debug
+org.opencv-updated_navigation_xml-1 /Users/hemant/Center_Finder/opencv/build/generated/updated_navigation_xml/debug
+org.opencv-mergeDebugResources-2 /Users/hemant/Center_Finder/opencv/build/intermediates/incremental/debug/mergeDebugResources/merged.dir
+org.opencv-mergeDebugResources-3 /Users/hemant/Center_Finder/opencv/build/intermediates/incremental/debug/mergeDebugResources/stripped.dir
+org.opencv-debug-4 /Users/hemant/Center_Finder/opencv/build/intermediates/merged_res/debug/mergeDebugResources
+org.opencv-debug-5 /Users/hemant/Center_Finder/opencv/build/intermediates/packaged_res/debug/packageDebugResources
+org.opencv-java-6 /Users/hemant/Center_Finder/opencv/java/res
+org.opencv-debug-7 /Users/hemant/Center_Finder/opencv/src/debug/res
+gradleHome-0 /Users/hemant/.gradle

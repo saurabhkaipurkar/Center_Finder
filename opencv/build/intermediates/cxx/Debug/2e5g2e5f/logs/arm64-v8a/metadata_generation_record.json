@@ -1,0 +1,67 @@
+[
+{
+  "message": "Start JSON generation. Platform version: 21 min SDK version: arm64-v8a",
+  "file": "/Users/hemant/Center_Finder/opencv/libcxx_helper/CMakeLists.txt",
+  "tag": "debug|arm64-v8a"
+},
+{
+  "message": "rebuilding JSON /Users/hemant/Center_Finder/opencv/.cxx/Debug/2e5g2e5f/arm64-v8a/android_gradle_build.json due to:",
+  "file": "/Users/hemant/Center_Finder/opencv/libcxx_helper/CMakeLists.txt",
+  "tag": "debug|arm64-v8a"
+},
+{
+  "message": "- a hard configure file changed, will remove stale configuration folder",
+  "file": "/Users/hemant/Center_Finder/opencv/libcxx_helper/CMakeLists.txt",
+  "tag": "debug|arm64-v8a"
+},
+{
+  "message": "  - /Users/hemant/Center_Finder/opencv/.cxx/Debug/2e5g2e5f/arm64-v8a/metadata_generation_command.txt (LAST_MODIFIED_CHANGED)",
+  "file": "/Users/hemant/Center_Finder/opencv/libcxx_helper/CMakeLists.txt",
+  "tag": "debug|arm64-v8a"
+},
+{
+  "message": "removing stale contents from \u0027/Users/hemant/Center_Finder/opencv/.cxx/Debug/2e5g2e5f/arm64-v8a\u0027",
+  "file": "/Users/hemant/Center_Finder/opencv/libcxx_helper/CMakeLists.txt",
+  "tag": "debug|arm64-v8a"
+},
+{
+  "message": "created folder \u0027/Users/hemant/Center_Finder/opencv/.cxx/Debug/2e5g2e5f/arm64-v8a\u0027",
+  "file": "/Users/hemant/Center_Finder/opencv/libcxx_helper/CMakeLists.txt",
+  "tag": "debug|arm64-v8a"
+},
+{
+  "message": "executing cmake /Users/hemant/Library/Android/sdk/cmake/3.22.1/bin/cmake \\\n  -H/Users/hemant/Center_Finder/opencv/libcxx_helper \\\n  -DCMAKE_SYSTEM_NAME\u003dAndroid \\\n  -DCMAKE_EXPORT_COMPILE_COMMANDS\u003dON \\\n  -DCMAKE_SYSTEM_VERSION\u003d21 \\\n  -DANDROID_PLATFORM\u003dandroid-21 \\\n  -DANDROID_ABI\u003darm64-v8a \\\n  -DCMAKE_ANDROID_ARCH_ABI\u003darm64-v8a \\\n  -DANDROID_NDK\u003d/Users/hemant/Library/Android/sdk/ndk/28.2.13676358 \\\n  -DCMAKE_ANDROID_NDK\u003d/Users/hemant/Library/Android/sdk/ndk/28.2.13676358 \\\n  -DCMAKE_TOOLCHAIN_FILE\u003d/Users/hemant/Library/Android/sdk/ndk/28.2.13676358/build/cmake/android.toolchain.cmake \\\n  -DCMAKE_MAKE_PROGRAM\u003d/Users/hemant/Library/Android/sdk/cmake/3.22.1/bin/ninja \\\n  -DCMAKE_LIBRARY_OUTPUT_DIRECTORY\u003d/Users/hemant/Center_Finder/opencv/build/intermediates/cxx/Debug/2e5g2e5f/obj/arm64-v8a \\\n  -DCMAKE_RUNTIME_OUTPUT_DIRECTORY\u003d/Users/hemant/Center_Finder/opencv/build/intermediates/cxx/Debug/2e5g2e5f/obj/arm64-v8a \\\n  -DCMAKE_BUILD_TYPE\u003dDebug \\\n  -B/Users/hemant/Center_Finder/opencv/.cxx/Debug/2e5g2e5f/arm64-v8a \\\n  -GNinja \\\n  -DANDROID_STL\u003dc++_shared\n",
+  "file": "/Users/hemant/Center_Finder/opencv/libcxx_helper/CMakeLists.txt",
+  "tag": "debug|arm64-v8a"
+},
+{
+  "message": "/Users/hemant/Library/Android/sdk/cmake/3.22.1/bin/cmake \\\n  -H/Users/hemant/Center_Finder/opencv/libcxx_helper \\\n  -DCMAKE_SYSTEM_NAME\u003dAndroid \\\n  -DCMAKE_EXPORT_COMPILE_COMMANDS\u003dON \\\n  -DCMAKE_SYSTEM_VERSION\u003d21 \\\n  -DANDROID_PLATFORM\u003dandroid-21 \\\n  -DANDROID_ABI\u003darm64-v8a \\\n  -DCMAKE_ANDROID_ARCH_ABI\u003darm64-v8a \\\n  -DANDROID_NDK\u003d/Users/hemant/Library/Android/sdk/ndk/28.2.13676358 \\\n  -DCMAKE_ANDROID_NDK\u003d/Users/hemant/Library/Android/sdk/ndk/28.2.13676358 \\\n  -DCMAKE_TOOLCHAIN_FILE\u003d/Users/hemant/Library/Android/sdk/ndk/28.2.13676358/build/cmake/android.toolchain.cmake \\\n  -DCMAKE_MAKE_PROGRAM\u003d/Users/hemant/Library/Android/sdk/cmake/3.22.1/bin/ninja \\\n  -DCMAKE_LIBRARY_OUTPUT_DIRECTORY\u003d/Users/hemant/Center_Finder/opencv/build/intermediates/cxx/Debug/2e5g2e5f/obj/arm64-v8a \\\n  -DCMAKE_RUNTIME_OUTPUT_DIRECTORY\u003d/Users/hemant/Center_Finder/opencv/build/intermediates/cxx/Debug/2e5g2e5f/obj/arm64-v8a \\\n  -DCMAKE_BUILD_TYPE\u003dDebug \\\n  -B/Users/hemant/Center_Finder/opencv/.cxx/Debug/2e5g2e5f/arm64-v8a \\\n  -GNinja \\\n  -DANDROID_STL\u003dc++_shared\n",
+  "file": "/Users/hemant/Center_Finder/opencv/libcxx_helper/CMakeLists.txt",
+  "tag": "debug|arm64-v8a"
+},
+{
+  "message": "Received process result: 0",
+  "file": "/Users/hemant/Center_Finder/opencv/libcxx_helper/CMakeLists.txt",
+  "tag": "debug|arm64-v8a"
+},
+{
+  "message": "Exiting generation of /Users/hemant/Center_Finder/opencv/.cxx/Debug/2e5g2e5f/arm64-v8a/compile_commands.json.bin normally",
+  "file": "/Users/hemant/Center_Finder/opencv/libcxx_helper/CMakeLists.txt",
+  "tag": "debug|arm64-v8a"
+},
+{
+  "message": "done executing cmake",
+  "file": "/Users/hemant/Center_Finder/opencv/libcxx_helper/CMakeLists.txt",
+  "tag": "debug|arm64-v8a"
+},
+{
+  "message": "hard linked /Users/hemant/Center_Finder/opencv/.cxx/Debug/2e5g2e5f/arm64-v8a/compile_commands.json to /Users/hemant/Center_Finder/opencv/.cxx/tools/debug/arm64-v8a/compile_commands.json",
+  "file": "/Users/hemant/Center_Finder/opencv/libcxx_helper/CMakeLists.txt",
+  "tag": "debug|arm64-v8a"
+},
+{
+  "message": "JSON generation completed without problems",
+  "file": "/Users/hemant/Center_Finder/opencv/libcxx_helper/CMakeLists.txt",
+  "tag": "debug|arm64-v8a"
+}
+]

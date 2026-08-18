@@ -1,0 +1,4 @@
+/Users/hemant/Library/Android/sdk/cmake/3.22.1/bin/ninja \
+  -C \
+  /Users/hemant/Center_Finder/opencv/.cxx/Debug/2e5g2e5f/x86_64 \
+  opencv_jni_shared
