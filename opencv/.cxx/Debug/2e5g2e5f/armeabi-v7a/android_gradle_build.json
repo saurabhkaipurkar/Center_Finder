@@ -1,0 +1,37 @@
+{
+  "buildFiles": [
+    "/Users/hemant/Center_Finder/opencv/libcxx_helper/CMakeLists.txt"
+  ],
+  "cleanCommandsComponents": [
+    [
+      "/Users/hemant/Library/Android/sdk/cmake/3.22.1/bin/ninja",
+      "-C",
+      "/Users/hemant/Center_Finder/opencv/.cxx/Debug/2e5g2e5f/armeabi-v7a",
+      "clean"
+    ]
+  ],
+  "buildTargetsCommandComponents": [
+    "/Users/hemant/Library/Android/sdk/cmake/3.22.1/bin/ninja",
+    "-C",
+    "/Users/hemant/Center_Finder/opencv/.cxx/Debug/2e5g2e5f/armeabi-v7a",
+    "{LIST_OF_TARGETS_TO_BUILD}"
+  ],
+  "libraries": {
+    "opencv_jni_shared::@6890427a1f51a3e7e1df": {
+      "toolchain": "toolchain",
+      "abi": "armeabi-v7a",
+      "artifactName": "opencv_jni_shared",
+      "output": "/Users/hemant/Center_Finder/opencv/.cxx/Debug/2e5g2e5f/armeabi-v7a/libopencv_jni_shared.a"
+    }
+  },
+  "toolchains": {
+    "toolchain": {
+      "cCompilerExecutable": "/Users/hemant/Library/Android/sdk/ndk/28.2.13676358/toolchains/llvm/prebuilt/darwin-x86_64/bin/clang.lld",
+      "cppCompilerExecutable": "/Users/hemant/Library/Android/sdk/ndk/28.2.13676358/toolchains/llvm/prebuilt/darwin-x86_64/bin/clang++.lld"
+    }
+  },
+  "cFileExtensions": [],
+  "cppFileExtensions": [
+    "cpp"
+  ]
+}

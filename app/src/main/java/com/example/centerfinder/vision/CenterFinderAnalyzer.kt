@@ -75,7 +75,15 @@ class CenterFinderAnalyzer(private val onResult: (DetectionResult?) -> Unit) : I
     private fun detectHoneycomb(cands: List<Candidate>, chosen: Candidate, w: Int, h: Int) = cands.filter { it.kind == ShapeKind.Hexagon && it.area > w*h*0.002 && hypot((it.center.x-chosen.center.x).toDouble(), (it.center.y-chosen.center.y).toDouble()) < min(w,h)*0.45 }.distinctBy { (it.center.x/12).roundToInt() to (it.center.y/12).roundToInt() }
     private fun honeycombResult(cells: List<Candidate>, chosen: Candidate, w: Int, h: Int): DetectionResult { val c = Offset(cells.map { it.center.x }.average().toFloat(), cells.map { it.center.y }.average().toFloat()); return DetectionResult(ShapeKind.Honeycomb, chosen.outline, c, .86f, w, h, cells.map { CellOverlay(it.outline, it.center) }) }
     private fun Candidate.toResult(w: Int, h: Int) = DetectionResult(kind, outline, center, confidence, w, h)
-    private fun smooth(old: DetectionResult?, new: DetectionResult): DetectionResult { if (old == null || old.frameWidth != new.frameWidth || old.frameHeight != new.frameHeight) return new; fun mix(a: Offset,b: Offset)=Offset(a.x*.65f+b.x*.35f,a.y*.65f+b.y*.35f); return new.copy(center = mix(old.center,new.center), outline = new.outline.mapIndexed { i,p -> old.outline.getOrNull(i)?.let { mix(it,p) } ?: p }) }
+
+    private fun smooth(old: DetectionResult?, new: DetectionResult): DetectionResult {
+        if (old == null || old.frameWidth != new.frameWidth || old.frameHeight != new.frameHeight) return new
+        fun mix(a: Offset, b: Offset) = Offset(a.x * 0.65f + b.x * 0.35f, a.y * 0.65f + b.y * 0.35f)
+        return new.copy(
+            center = mix(old.center, new.center),
+            outline = new.outline.mapIndexed { i, p -> old.outline.getOrNull(i)?.let { mix(it, p) } ?: p }
+        )
+    }
 
     private data class Candidate(val kind: ShapeKind, val outline: List<Offset>, val center: Offset, val confidence: Float, val score: Float, val area: Double)
 }
