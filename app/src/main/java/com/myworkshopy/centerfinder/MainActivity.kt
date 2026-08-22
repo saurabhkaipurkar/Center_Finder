@@ -4,100 +4,102 @@ import android.Manifest
 import android.content.pm.PackageManager
 import android.os.Bundle
 import android.util.Log
-import android.view.ViewGroup
-import android.widget.Toast
 import androidx.activity.ComponentActivity
+import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.compose.setContent
-import androidx.activity.enableEdgeToEdge
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.camera.core.CameraSelector
 import androidx.camera.core.ImageAnalysis
+import androidx.camera.core.ImageProxy
 import androidx.camera.core.Preview
-import androidx.camera.core.resolutionselector.ResolutionSelector
-import androidx.camera.core.resolutionselector.ResolutionStrategy
 import androidx.camera.lifecycle.ProcessCameraProvider
 import androidx.camera.view.PreviewView
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.Button
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Path
-import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.core.content.ContextCompat
-import androidx.lifecycle.LifecycleOwner
-import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.lifecycle.compose.LocalLifecycleOwner
 import com.myworkshopy.centerfinder.ui.theme.CenterFinderTheme
 import org.opencv.android.OpenCVLoader
-import kotlin.math.max
-import android.util.Size as AndroidSize
+import org.opencv.core.Core
+import org.opencv.core.CvType
+import org.opencv.core.Mat
+import org.opencv.core.MatOfPoint
+import org.opencv.core.MatOfPoint2f
+import org.opencv.core.Rect
+import org.opencv.core.Size
+import org.opencv.geometry.Geometry
+import org.opencv.imgproc.Imgproc
+import java.nio.ByteBuffer
+import kotlin.math.abs
 
 class MainActivity : ComponentActivity() {
 
-    private val requestPermissionLauncher = registerForActivityResult(
-        ActivityResultContracts.RequestPermission()
-    ) { isGranted ->
-        cameraGranted.value = isGranted
-        if (!isGranted) {
-            Toast.makeText(this, "Camera permission is required", Toast.LENGTH_LONG).show()
-        }
-    }
-
-    private val cameraGranted = mutableStateOf(false)
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        enableEdgeToEdge()
 
-        if (!OpenCVLoader.initLocal()) {
-            Log.e("OpenCV", "OpenCV failed to load")
-            Toast.makeText(this, "OpenCV failed to load", Toast.LENGTH_LONG).show()
-        }
-
-        cameraGranted.value = ContextCompat.checkSelfPermission(this, Manifest.permission.CAMERA) ==
-            PackageManager.PERMISSION_GRANTED
-        if (!cameraGranted.value) {
-            requestPermissionLauncher.launch(Manifest.permission.CAMERA)
-        }
+        val openCvReady = OpenCVLoader.initLocal()
 
         setContent {
             CenterFinderTheme {
                 Surface(modifier = Modifier.fillMaxSize()) {
-                    val granted by cameraGranted
-                    if (granted) {
-                        ShapeDetectScreen()
-                    } else {
-                        PermissionPrompt(
-                            onRequest = { requestPermissionLauncher.launch(Manifest.permission.CAMERA) }
+                    var hasCameraPermission by remember {
+                        mutableStateOf(
+                            ContextCompat.checkSelfPermission(
+                                this@MainActivity, Manifest.permission.CAMERA
+                            ) == PackageManager.PERMISSION_GRANTED
                         )
+                    }
+
+                    val permissionLauncher = rememberLauncherForActivityResult(
+                        contract = ActivityResultContracts.RequestPermission()
+                    ) { granted -> hasCameraPermission = granted }
+
+                    LaunchedEffect(Unit) {
+                        if (!hasCameraPermission) {
+                            permissionLauncher.launch(Manifest.permission.CAMERA)
+                        }
+                    }
+
+                    when {
+                        !openCvReady -> {
+                            Box(Modifier.fillMaxSize()) {
+                                Text(
+                                    "OpenCV failed to initialize",
+                                    modifier = Modifier.align(Alignment.Center)
+                                )
+                            }
+                        }
+                        hasCameraPermission -> CameraFinderScreen()
+                        else -> {
+                            Box(Modifier.fillMaxSize()) {
+                                Text(
+                                    "Camera permission is required",
+                                    modifier = Modifier.align(Alignment.Center)
+                                )
+                            }
+                        }
                     }
                 }
             }
@@ -105,46 +107,185 @@ class MainActivity : ComponentActivity() {
     }
 }
 
-@Composable
-private fun PermissionPrompt(onRequest: () -> Unit) {
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(32.dp),
-        verticalArrangement = Arrangement.Center,
-        horizontalAlignment = Alignment.CenterHorizontally
-    ) {
-        Text(
-            text = "Camera access is needed to detect shapes in real time.",
-            style = MaterialTheme.typography.titleMedium,
-            textAlign = TextAlign.Center
+
+/*------------------------------------------*/
+
+/**
+ * Result of analyzing a single camera frame.
+ * All coordinates are normalized (0..1) relative to [frameWidth] x [frameHeight],
+ * in the *display-oriented* frame (i.e. after correcting for sensor rotation).
+ */
+data class DetectionResult(
+    val shapeName: String,
+    val contourPoints: List<Pair<Float, Float>>,
+    val centroid: Pair<Float, Float>,
+    val frameWidth: Int,
+    val frameHeight: Int
+)
+
+/**
+ * CameraX analyzer that finds the largest object's outline in each frame,
+ * classifies its rough shape, and reports its centroid.
+ *
+ * Runs on the Y-plane only (grayscale) - fast, and all we need for edge detection.
+ */
+class ShapeAnalyzer(
+    private val onResult: (DetectionResult?) -> Unit
+) : ImageAnalysis.Analyzer {
+
+    override fun analyze(image: ImageProxy) {
+        try {
+            val gray = imageProxyToGrayMat(image)
+            val rotated = rotateMat(gray, image.imageInfo.rotationDegrees)
+            gray.release()
+
+            val result = detectLargestShape(rotated)
+            rotated.release()
+            onResult(result)
+        } catch (e: Exception) {
+            onResult(null)
+        } finally {
+            image.close()
+        }
+    }
+
+    private fun imageProxyToGrayMat(image: ImageProxy): Mat {
+        // ImageAnalysis default output is YUV_420_888; the Y plane alone is a
+        // valid grayscale image and is all we need here.
+        val yPlane = image.planes[0]
+        val yBuffer: ByteBuffer = yPlane.buffer
+        val rowStride = yPlane.rowStride
+        val width = image.width
+        val height = image.height
+
+        val mat = Mat(height, width, CvType.CV_8UC1)
+        if (rowStride == width) {
+            val bytes = ByteArray(yBuffer.remaining())
+            yBuffer.get(bytes)
+            mat.put(0, 0, bytes)
+        } else {
+            val rowBytes = ByteArray(rowStride)
+            for (row in 0 until height) {
+                yBuffer.position(row * rowStride)
+                yBuffer.get(rowBytes, 0, rowStride)
+                mat.put(row, 0, rowBytes.copyOfRange(0, width))
+            }
+        }
+        return mat
+    }
+
+    private fun rotateMat(src: Mat, rotationDegrees: Int): Mat {
+        if (rotationDegrees == 0) return src.clone()
+        val dst = Mat()
+        when (rotationDegrees) {
+            90 -> Core.rotate(src, dst, Core.ROTATE_90_CLOCKWISE)
+            180 -> Core.rotate(src, dst, Core.ROTATE_180)
+            270 -> Core.rotate(src, dst, Core.ROTATE_90_COUNTERCLOCKWISE)
+            else -> return src.clone()
+        }
+        return dst
+    }
+
+    private fun detectLargestShape(gray: Mat): DetectionResult? {
+        val blurred = Mat()
+        Imgproc.GaussianBlur(gray, blurred, Size(5.0, 5.0), 0.0)
+
+        val edges = Mat()
+        Imgproc.Canny(blurred, edges, 50.0, 150.0)
+        Imgproc.dilate(edges, edges, Mat())
+        blurred.release()
+
+        val contours = ArrayList<MatOfPoint>()
+        val hierarchy = Mat()
+        Imgproc.findContours(
+            edges, contours, hierarchy,
+            Imgproc.RETR_EXTERNAL, Imgproc.CHAIN_APPROX_SIMPLE
         )
-        Spacer(Modifier.height(16.dp))
-        Button(onClick = onRequest) {
-            Text("Allow camera")
+        edges.release()
+        hierarchy.release()
+
+        // Ignore tiny noise contours - require at least 1% of frame area.
+        val minArea = gray.rows() * gray.cols() * 0.01
+        var best: MatOfPoint? = null
+        var bestArea = 0.0
+        for (c in contours) {
+            val area = Geometry.contourArea(c)
+            if (area > bestArea && area > minArea) {
+                bestArea = area
+                best = c
+            }
+        }
+        val bestContour = best ?: return null
+
+        val moments = Geometry.moments(bestContour)
+        if (moments.m00 == 0.0) return null
+
+        val contour2f = MatOfPoint2f(*bestContour.toArray())
+        val approx = MatOfPoint2f()
+        val peri = Geometry.arcLength(contour2f, true)
+        Geometry.approxPolyDP(contour2f, approx, 0.02 * peri, true)
+        val vertexCount = approx.toArray().size
+        contour2f.release()
+        approx.release()
+
+        val shapeName = classifyShape(vertexCount, bestContour)
+
+        val w = gray.cols().toFloat()
+        val h = gray.rows().toFloat()
+        val cx = (moments.m10 / moments.m00).toFloat()
+        val cy = (moments.m01 / moments.m00).toFloat()
+
+        val normalizedContour = bestContour.toArray().map { p ->
+            Pair((p.x.toFloat() / w).coerceIn(0f, 1f), (p.y.toFloat() / h).coerceIn(0f, 1f))
+        }
+
+        return DetectionResult(
+            shapeName = shapeName,
+            contourPoints = normalizedContour,
+            centroid = Pair((cx / w).coerceIn(0f, 1f), (cy / h).coerceIn(0f, 1f)),
+            frameWidth = gray.cols(),
+            frameHeight = gray.rows()
+        )
+    }
+
+    private fun classifyShape(vertexCount: Int, contour: MatOfPoint): String {
+        return when (vertexCount) {
+            3 -> "Triangle"
+            4 -> {
+                val rect: Rect = Geometry.boundingRect(contour)
+                val ratio = rect.width.toFloat() / rect.height.toFloat()
+                if (abs(ratio - 1.0f) < 0.08f) "Square" else "Rectangle"
+            }
+            5 -> "Pentagon"
+            6 -> "Hexagon"
+            7, 8 -> "Octagon"
+            else -> {
+                val area = Geometry.contourArea(contour)
+                val contour2f = MatOfPoint2f(*contour.toArray())
+                val peri = Geometry.arcLength(contour2f, true)
+                contour2f.release()
+                val circularity = if (peri > 0) (4 * Math.PI * area) / (peri * peri) else 0.0
+                if (circularity > 0.75) "Circle" else "Object"
+            }
         }
     }
 }
 
-@Composable
-fun ShapeDetectScreen(viewModel: ShapeViewModel = viewModel()) {
-    val context = LocalContext.current
-    val lifecycleOwner = context as LifecycleOwner
-    val mainExecutor = remember { ContextCompat.getMainExecutor(context) }
 
-    val frame by viewModel.detectionFrame.collectAsState()
-    val stableName by viewModel.stableName.collectAsState()
+@Composable
+fun CameraFinderScreen() {
+    val context = LocalContext.current
+    val lifecycleOwner = LocalLifecycleOwner.current
+
+    var detection by remember { mutableStateOf<DetectionResult?>(null) }
 
     Box(modifier = Modifier.fillMaxSize()) {
+
         AndroidView(
+            modifier = Modifier.fillMaxSize(),
             factory = { ctx ->
                 val previewView = PreviewView(ctx).apply {
-                    layoutParams = ViewGroup.LayoutParams(
-                        ViewGroup.LayoutParams.MATCH_PARENT,
-                        ViewGroup.LayoutParams.MATCH_PARENT
-                    )
-                    scaleType = PreviewView.ScaleType.FILL_CENTER
-                    implementationMode = PreviewView.ImplementationMode.COMPATIBLE
+                    scaleType = PreviewView.ScaleType.FIT_CENTER
                 }
 
                 val cameraProviderFuture = ProcessCameraProvider.getInstance(ctx)
@@ -152,216 +293,98 @@ fun ShapeDetectScreen(viewModel: ShapeViewModel = viewModel()) {
                     val cameraProvider = cameraProviderFuture.get()
 
                     val preview = Preview.Builder().build().also {
-                        it.surfaceProvider = previewView.surfaceProvider
+                        it.setSurfaceProvider(previewView.surfaceProvider)
                     }
 
                     val analysis = ImageAnalysis.Builder()
                         .setBackpressureStrategy(ImageAnalysis.STRATEGY_KEEP_ONLY_LATEST)
-                        .setOutputImageRotationEnabled(true)
-                        .setOutputImageFormat(ImageAnalysis.OUTPUT_IMAGE_FORMAT_RGBA_8888)
-                        .setResolutionSelector(
-                            ResolutionSelector.Builder()
-                                .setResolutionStrategy(
-                                    ResolutionStrategy(
-                                        AndroidSize(1280, 720),
-                                        ResolutionStrategy.FALLBACK_RULE_CLOSEST_HIGHER_THEN_LOWER
-                                    )
-                                )
-                                .build()
-                        )
                         .build()
-                        .also { useCase ->
-                            useCase.setAnalyzer(viewModel.cameraExecutor) { imageProxy ->
-                                try {
-                                    val plane = imageProxy.planes[0]
-                                    val mat = imageProxyToMat(
-                                        imageProxy.width,
-                                        imageProxy.height,
-                                        plane.rowStride,
-                                        plane.buffer
-                                    )
-                                    if (mat != null) {
-                                        viewModel.onFrameAnalyzed(
-                                            mat,
-                                            imageProxy.imageInfo.rotationDegrees
-                                        )
-                                    }
-                                } catch (e: Exception) {
-                                    Log.e("OpenCV", "Processing error", e)
-                                } finally {
-                                    imageProxy.close()
-                                }
-                            }
+                        .also {
+                            it.setAnalyzer(
+                                ContextCompat.getMainExecutor(ctx),
+                                ShapeAnalyzer { result -> detection = result }
+                            )
                         }
+
+                    val selector = CameraSelector.DEFAULT_BACK_CAMERA
 
                     try {
                         cameraProvider.unbindAll()
                         cameraProvider.bindToLifecycle(
-                            lifecycleOwner,
-                            CameraSelector.DEFAULT_BACK_CAMERA,
-                            preview,
-                            analysis
+                            lifecycleOwner, selector, preview, analysis
                         )
                     } catch (e: Exception) {
-                        Log.e("CameraX", "Use case binding failed", e)
+                        Log.e("CameraFinderScreen", "Camera bind failed", e)
                     }
-                }, mainExecutor)
+                }, ContextCompat.getMainExecutor(ctx))
 
                 previewView
-            },
-            modifier = Modifier.fillMaxSize()
-        )
-
-        ShapeOverlay(
-            detection = frame,
-            modifier = Modifier.fillMaxSize()
-        )
-
-        Text(
-            text = "Point the camera at an object",
-            color = Color.White,
-            fontSize = 14.sp,
-            modifier = Modifier
-                .align(Alignment.TopCenter)
-                .padding(top = 48.dp)
-                .background(Color.Black.copy(alpha = 0.45f), RoundedCornerShape(20.dp))
-                .padding(horizontal = 16.dp, vertical = 8.dp)
-        )
-
-        ResultCard(
-            detection = frame,
-            stableName = stableName,
-            modifier = Modifier
-                .align(Alignment.BottomCenter)
-                .fillMaxWidth()
-                .padding(16.dp)
-        )
-    }
-}
-
-@Composable
-private fun ResultCard(
-    detection: FrameDetection?,
-    stableName: String?,
-    modifier: Modifier = Modifier
-) {
-    val shape = detection?.primary
-    val title = shape?.name ?: stableName ?: "Looking for a shape…"
-    val extras = detection?.extras.orEmpty()
-
-    Card(
-        modifier = modifier,
-        colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.surface.copy(alpha = 0.9f)
-        )
-    ) {
-        Column(modifier = Modifier.padding(16.dp)) {
-            Text(
-                text = title,
-                style = MaterialTheme.typography.headlineSmall,
-                fontWeight = FontWeight.Bold
-            )
-            if (shape != null) {
-                val percent = (shape.confidence * 100).toInt()
-                val center = "(${shape.centerX.toInt()}, ${shape.centerY.toInt()})"
-                val detail = buildString {
-                    append("$percent%  ·  center $center")
-                    if (title == "Honeycomb" && extras.isNotEmpty()) {
-                        append("  ·  ${extras.size} cells")
-                    }
-                }
-                Text(
-                    text = detail,
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.75f)
-                )
-            } else {
-                Text(
-                    text = "Aim at the object — its border and center will lock on",
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f)
-                )
             }
-        }
-    }
-}
+        )
 
-@Composable
-private fun ShapeOverlay(
-    detection: FrameDetection?,
-    modifier: Modifier = Modifier
-) {
-    Canvas(modifier = modifier) {
-        val viewW = size.width
-        val viewH = size.height
+        // Overlay: contour outline + centroid crosshair.
+        // detection coordinates are normalized against the analysis frame; the
+        // PreviewView uses FIT_CENTER, so we letterbox-map the same way here.
+        Canvas(modifier = Modifier.fillMaxSize()) {
+            val result = detection ?: return@Canvas
+            val frameAspect = result.frameWidth.toFloat() / result.frameHeight.toFloat()
+            val viewAspect = size.width / size.height
 
-        val reticle = Color.White.copy(alpha = 0.35f)
-        val cx = viewW / 2f
-        val cy = viewH / 2f
-        drawCircle(reticle, radius = 28f, center = Offset(cx, cy), style = Stroke(width = 2f))
-        drawLine(reticle, Offset(cx - 18f, cy), Offset(cx + 18f, cy), strokeWidth = 2f)
-        drawLine(reticle, Offset(cx, cy - 18f), Offset(cx, cy + 18f), strokeWidth = 2f)
+            val scaledW: Float
+            val scaledH: Float
+            if (frameAspect > viewAspect) {
+                scaledW = size.width
+                scaledH = size.width / frameAspect
+            } else {
+                scaledH = size.height
+                scaledW = size.height * frameAspect
+            }
+            val offsetX = (size.width - scaledW) / 2f
+            val offsetY = (size.height - scaledH) / 2f
 
-        val frame = detection ?: return@Canvas
-        val primary = frame.primary ?: return@Canvas
-        val imgW = frame.imageWidth
-        val imgH = frame.imageHeight
-        if (imgW <= 0 || imgH <= 0) return@Canvas
+            fun toCanvas(p: Pair<Float, Float>) = Offset(
+                offsetX + p.first * scaledW,
+                offsetY + p.second * scaledH
+            )
 
-        val scale = max(viewW / imgW, viewH / imgH)
-        val dx = (viewW - imgW * scale) / 2f
-        val dy = (viewH - imgH * scale) / 2f
-        fun map(x: Float, y: Float) = Offset(x * scale + dx, y * scale + dy)
-
-        val accent = when (primary.name) {
-            "Honeycomb", "Hexagon" -> Color(0xFFFFC107)
-            "Circle", "Oval" -> Color(0xFF4FC3F7)
-            "Object" -> Color(0xFFB2FF59)
-            else -> Color(0xFF69F0AE)
-        }
-
-        fun drawOutline(shape: DetectedShape, stroke: Float, color: Color, corners: Boolean) {
-            if (shape.points.size >= 3) {
+            if (result.contourPoints.size > 1) {
                 val path = Path().apply {
-                    val first = map(shape.points[0].first, shape.points[0].second)
+                    val first = toCanvas(result.contourPoints.first())
                     moveTo(first.x, first.y)
-                    for (i in 1 until shape.points.size) {
-                        val p = map(shape.points[i].first, shape.points[i].second)
-                        lineTo(p.x, p.y)
+                    result.contourPoints.drop(1).forEach { pt ->
+                        val c = toCanvas(pt)
+                        lineTo(c.x, c.y)
                     }
                     close()
                 }
-                drawPath(path, color = color, style = Stroke(width = stroke, cap = StrokeCap.Round))
-                if (corners) {
-                    for (pt in shape.points) {
-                        drawCircle(Color.White, radius = 5f, center = map(pt.first, pt.second))
-                    }
-                }
-            } else {
-                val r = shape.radius
-                if (r != null) {
-                    drawCircle(
-                        color = color,
-                        radius = r * scale,
-                        center = map(shape.centerX, shape.centerY),
-                        style = Stroke(width = stroke)
-                    )
-                }
+                drawPath(path, color = Color(0xFF00E676), style = Stroke(width = 4f))
             }
+
+            val center = toCanvas(result.centroid)
+            val crossSize = 24f
+            drawLine(
+                color = Color.Red,
+                start = Offset(center.x - crossSize, center.y),
+                end = Offset(center.x + crossSize, center.y),
+                strokeWidth = 4f
+            )
+            drawLine(
+                color = Color.Red,
+                start = Offset(center.x, center.y - crossSize),
+                end = Offset(center.x, center.y + crossSize),
+                strokeWidth = 4f
+            )
         }
 
-        fun drawCenter(shape: DetectedShape) {
-            val center = map(shape.centerX, shape.centerY)
-            drawCircle(Color(0xFFFF5252), radius = 5f, center = center)
-            drawLine(Color(0xFFFF5252), Offset(center.x - 16f, center.y), Offset(center.x + 16f, center.y), 3.5f)
-            drawLine(Color(0xFFFF5252), Offset(center.x, center.y - 16f), Offset(center.x, center.y + 16f), 3.5f)
-        }
-
-        for (extra in frame.extras) {
-            drawOutline(extra, 3.5f, accent.copy(alpha = 0.75f), corners = false)
-            drawCenter(extra)
-        }
-        drawOutline(primary, 7f, accent, corners = primary.name == "Square" || primary.name == "Rectangle")
-        drawCenter(primary)
+        Text(
+            text = detection?.shapeName ?: "Searching…",
+            color = Color.White,
+            style = MaterialTheme.typography.titleLarge,
+            modifier = Modifier
+                .align(Alignment.TopCenter)
+                .padding(top = 32.dp)
+                .background(Color.Black.copy(alpha = 0.5f), RoundedCornerShape(8.dp))
+                .padding(horizontal = 16.dp, vertical = 8.dp)
+        )
     }
 }
