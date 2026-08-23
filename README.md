@@ -417,22 +417,22 @@ These tests do not need OpenCV or an emulator.
 - **Profile screen** is a route constant only.
 - **`ShapeMath` / `DetectionSmoother`** are not yet used by the live analyzer.
 - **Preview and analysis can differ in resolution.** Mapping assumes they share aspect after rotation. Unusual crop sensors can still show a small offset.
-
+ 
 ---
-
+ 
 ## Roadmap ideas
-
+ 
 - Wire `ShapeMath` scores + `DetectionSmoother` into `ShapeAnalyzer` so labels stop flickering.
 - Multi-object Center Finder (all contours above a size floor, tap to pin one).
 - Torch, zoom, and front/back camera toggle.
 - Export count / centroid as a still with overlay (needs a save path and a storage or share sheet).
 - Calibrated real-world units (mm) using a reference marker in frame.
 - Profile / saved measurements.
-
+ 
 ---
-
+ 
 ## License
-
-Application code: add a license of your choice before publishing.
-
+ 
+Not Required for now.
+ 
 OpenCV is licensed under [Apache 2.0](https://opencv.org/license/). The vendored `opencv/` module includes third-party notices under `opencv/etc/licenses/`.
