@@ -74,4 +74,10 @@ dependencies {
 
     // Vendor extensions like Bokeh, HDR, and Night Mode (Optional)
     implementation("androidx.camera:camera-extensions:$cameraxVersion")
+
+    // Navigation dependency
+    implementation("androidx.navigation:navigation-compose:2.9.3")
+
+    // icons
+    implementation("androidx.compose.material:material-icons-extended")
 }
