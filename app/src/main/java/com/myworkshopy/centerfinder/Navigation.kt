@@ -25,13 +25,17 @@ fun AppNavigation(modifier: Modifier = Modifier) {
             )
         }
 
+        composable(Screen.ObjectCount.route) {
+            ObjectCounterScreen()
+        }
+
         composable(Screen.Dashboard.route) {
             DashboardScreen(
                 onCenterFinderClick = {
                     navController.navigate(Screen.CenterFinder.route)
                 },
                 onObjectCounterClick = {
-                    navController.navigate(Screen.CenterFinder.route)
+                    navController.navigate(Screen.ObjectCount.route)
                 }
             )
         }

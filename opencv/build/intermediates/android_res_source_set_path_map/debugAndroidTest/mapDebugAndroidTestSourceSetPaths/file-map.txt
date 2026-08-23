@@ -1,5 +1,0 @@
-org.opencv.test.opencv-updated_navigation_xml-0 /Users/hemant/Center_Finder/opencv/build/generated/updated_navigation_xml/debugAndroidTest
-org.opencv.test.opencv-packageDebugAndroidTestResources-1 /Users/hemant/Center_Finder/opencv/build/intermediates/incremental/debugAndroidTest/packageDebugAndroidTestResources/merged.dir
-org.opencv.test.opencv-packageDebugAndroidTestResources-2 /Users/hemant/Center_Finder/opencv/build/intermediates/incremental/debugAndroidTest/packageDebugAndroidTestResources/stripped.dir
-org.opencv.test.opencv-debugAndroidTest-3 /Users/hemant/Center_Finder/opencv/build/intermediates/merged_res/debugAndroidTest/mergeDebugAndroidTestResources
-gradleHome-0 /Users/hemant/.gradle

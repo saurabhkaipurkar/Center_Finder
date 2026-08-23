@@ -1,3 +1,0 @@
-ninja: Entering directory `/Users/hemant/Center_Finder/opencv/.cxx/Debug/2e5g2e5f/x86_64'
-[1/2] Building CXX object CMakeFiles/opencv_jni_shared.dir/dummy.cpp.o
-[2/2] Linking CXX static library libopencv_jni_shared.a
